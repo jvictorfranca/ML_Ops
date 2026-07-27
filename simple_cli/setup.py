@@ -42,8 +42,8 @@ setup(
     """,
 
     # Package author information
-    author="Alfredo Deza",
-    author_email="alfredo@deza.pe",
+    author="Joao Franca",
+    author_email="jvictorfranca@yahoo.com.br",
 
     # Automatically discover all Python packages
     # (directories containing __init__.py)
