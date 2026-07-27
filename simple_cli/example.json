@@ -1,16 +1,7 @@
 {
-    "z": 42,
-    "name": "jformat",
-    "description": "A simple JSON formatter CLI tool",
-    "version": "0.0.1",
-    "author": {
-        "name": "Joao Franca",
-        "role": "developer"
-    },
-    "features": [
-        "JSON formatting",
-        "CLI interface",
-        "key sorting"
-    ],
-    "active": true
+    "z": 42,"name": "jformat","description": "A simple JSON formatter CLI tool","version": "0.0.1","author": {
+        "name": "Joao Franca",    "role": "developer"
+    },"features": [
+        "JSON formatting","CLI interface","key sorting"
+    ],"active": true
 }
