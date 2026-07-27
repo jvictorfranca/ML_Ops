@@ -4,8 +4,8 @@ from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer
 
 dataset = load_dataset("yelp_review_full")
-dataset["train"][100]
-
+print("dataset loaded")
+print(dataset["train"][100])
 
 tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-cased")
 
@@ -28,9 +28,11 @@ def compute_metrics(eval_pred):
     predictions = np.argmax(logits, axis=-1)
     return metric.compute(predictions=predictions, references=labels)
 
-
+print("tokenized_datasets loaded")
 small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(1000))
 small_eval_dataset = tokenized_datasets["test"].shuffle(seed=42).select(range(1000))
+
+print("small_train_dataset loaded")
 
 trainer = Trainer(
     model=model,
@@ -40,4 +42,9 @@ trainer = Trainer(
     compute_metrics=compute_metrics,
 )
 
+print("trainer loaded")
+
 trainer.train()
+
+print("trainer trained")
+print(trainer.evaluate())
