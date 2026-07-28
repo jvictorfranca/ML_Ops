@@ -1,11 +1,6 @@
-from transformers import pipeline
-import pandas as pd
-import os
-import mlflow
-from mlflow import log_artifact
-from mlflow.models import ModelSignature
 import json
-from mlflow.tracking import MlflowClient
+import mlflow
+from mlflow.models import ModelSignature
 
 
 class Summarizer(mlflow.pyfunc.PythonModel):
