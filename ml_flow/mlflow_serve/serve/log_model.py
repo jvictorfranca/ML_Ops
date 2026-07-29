@@ -29,9 +29,11 @@ with mlflow.start_run(run_name="t5-summarizer") as run:
     runner = run.info.run_id
     print("mlflow models serve -m runs:/" +
           run.info.run_id + "/model --no-conda")
-    mlflow.pyfunc.log_model('model', loader_module=None, data_path=None, code_path=None,
-                            conda_env=None, python_model=Summarizer(),
-                            artifacts=None, registered_model_name="t5-small-summarizer", signature=signature,
-                            input_example=None, await_registration_for=0)
+    mlflow.pyfunc.log_model(
+    artifact_path="model",
+    python_model=Summarizer(),
+    registered_model_name="t5-small-summarizer",
+    signature=signature
+)
 
 #curl -X POST -H "Content-Type:application/json; format=pandas-split" --data '{"columns":["text"],"data":[["Today is a perfect day to practice automation skills"]]}' http://127.0.0.1:5000/invocations
