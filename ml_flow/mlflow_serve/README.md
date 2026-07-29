@@ -1,11 +1,13 @@
-# MLflow Validation and Model Logging Examples
+# MLflow Validation and Model Serving Examples
 
-This project contains examples demonstrating how to use **MLflow** for:
+This project demonstrates how to use **MLflow** for:
 
-- Data validation with metric tracking
-- Logging a Hugging Face Transformer model
-- Registering a model
-- Serving the model using MLflow Model Serving
+- Dataset validation
+- MLflow metric tracking
+- Logging Hugging Face Transformer models
+- Registering models in MLflow Model Registry
+- Serving models using MLflow Model Serving
+- Running workflows using MLflow Projects
 
 ---
 
@@ -15,6 +17,8 @@ This project contains examples demonstrating how to use **MLflow** for:
 .
 ├── validate.py         # Dataset validation and MLflow metric logging
 ├── log_model.py        # Logs and registers the Hugging Face model
+├── MLproject           # MLflow Project configuration
+├── conda.yaml          # MLflow environment configuration
 ├── requirements.txt
 └── README.md
 ```
@@ -28,20 +32,19 @@ Before running the project, make sure you have:
 - Python 3.9+
 - pip
 - MLflow installed
-- A running MLflow Tracking Server
 
 ---
 
-# 1. Create a Virtual Environment
+# 1. Create Virtual Environment
 
-### Windows
+## Windows
 
 ```bash
 python -m venv .venv
 .venv\Scripts\activate
 ```
 
-### Linux/macOS
+## Linux/macOS
 
 ```bash
 python3 -m venv .venv
@@ -52,6 +55,8 @@ source .venv/bin/activate
 
 # 2. Install Dependencies
 
+Install all required packages:
+
 ```bash
 pip install -r requirements.txt
 ```
@@ -60,7 +65,7 @@ pip install -r requirements.txt
 
 # 3. Start MLflow Tracking Server
 
-Start the MLflow server:
+Start the MLflow tracking server:
 
 ```bash
 mlflow server --host 127.0.0.1 --port 5000
@@ -78,13 +83,17 @@ Keep this terminal running.
 
 # 4. Log and Register the Model
 
-In another terminal, activate the virtual environment:
+Open another terminal and activate the environment:
 
 ```bash
 .venv\Scripts\activate
 ```
 
-Run:
+---
+
+## Running Directly with Python
+
+Execute:
 
 ```bash
 python log_model.py
@@ -92,16 +101,26 @@ python log_model.py
 
 The script will:
 
-- Download the `t5-small` model from Hugging Face
-- Create an MLflow run
-- Log the model
-- Register the model as:
+1. Download the `t5-small` model from Hugging Face
+2. Create an MLflow run
+3. Log the PyFunc model
+4. Register the model in MLflow Model Registry
+
+The registered model name will be:
 
 ```
 t5-small-summarizer
 ```
 
-At the end, MLflow will print the Run ID:
+Example output:
+
+```
+Successfully registered model 't5-small-summarizer'.
+
+Created version '1' of model 't5-small-summarizer'.
+```
+
+The script will also print the Run ID:
 
 Example:
 
@@ -111,15 +130,37 @@ Example:
 
 ---
 
-# 5. Configure MLflow Tracking URI
+# 5. Run Using MLflow Projects
 
-Before serving the model, configure the MLflow Tracking Server for the current terminal session:
+The project can also be executed using the `MLproject` file.
+
+Run:
+
+```bash
+mlflow run . -e log_model
+```
+
+This executes:
+
+```bash
+python log_model.py
+```
+
+through MLflow Projects.
+
+---
+
+# 6. Configure MLflow Tracking URI
+
+Before serving the model, configure the MLflow Tracking Server.
+
+## Bash / Git Bash
 
 ```bash
 export MLFLOW_TRACKING_URI=http://127.0.0.1:5000
 ```
 
-For Windows PowerShell:
+## Windows PowerShell
 
 ```powershell
 $env:MLFLOW_TRACKING_URI="http://127.0.0.1:5000"
@@ -127,15 +168,23 @@ $env:MLFLOW_TRACKING_URI="http://127.0.0.1:5000"
 
 ---
 
-# 6. Serve the Model
+# 7. Serve the Model
+
+Use the Run ID generated when logging the model.
+
+Example:
+
+```
+50fc33a01db74d3796f677426634317d
+```
 
 Start MLflow Model Serving:
 
 ```bash
-mlflow models serve -m runs:/50fc33a01db74d3796f677426634317d/model --port 5001 --env-manager local
+MLFLOW_TRACKING_URI=http://127.0.0.1:5000 mlflow models serve -m runs:/50fc33a01db74d3796f677426634317d/model --port 5001 --env-manager local
 ```
 
-The model will be available at:
+The model API will be available at:
 
 ```
 http://127.0.0.1:5001/invocations
@@ -143,12 +192,15 @@ http://127.0.0.1:5001/invocations
 
 ---
 
-# 7. Test Model Inference
+# 8. Test Model Inference
 
-Send a request to the model:
+Send a request using curl:
 
 ```bash
-curl -X POST -H "Content-Type: application/json" --data '{"dataframe_split":{"columns":["text"],"data":[["Today is a perfect day to practice automation skills"]]}}' http://127.0.0.1:5001/invocations
+curl -X POST \
+-H "Content-Type: application/json" \
+--data '{"dataframe_split":{"columns":["text"],"data":[["Today is a perfect day to practice automation skills"]]}}' \
+http://127.0.0.1:5001/invocations
 ```
 
 Expected response:
@@ -165,28 +217,96 @@ Expected response:
 
 # Dataset Validation
 
-The `validate.py` script performs basic data quality checks:
+The `validate.py` script performs basic data quality validation.
+
+It checks:
 
 - Empty columns
-- Columns with "Unnamed" names
+- Columns containing `"Unnamed"`
 - Fields containing carriage returns (`\r\n`)
 
-Run:
+---
 
-```bash
-python validate.py <metrics> <max_errors> <filename>
-```
-
-Example:
+## Run Validation Directly
 
 ```bash
 python validate.py True 10 dataset.csv
 ```
 
+Parameters:
+
+| Parameter | Description |
+|---|---|
+| metrics | Enable MLflow metric logging |
+| max_errors | Maximum number of allowed errors |
+| filename | Dataset file path |
+
 When metrics are enabled, MLflow logs:
 
-- Number of unnamed columns
-- Number of empty columns
+```
+unnamed
+zero_count_columns
+```
+
+---
+
+# Run Validation Using MLflow Projects
+
+The validation workflow is also available through `MLproject`.
+
+Example:
+
+```bash
+mlflow run . -e validate -P metrics=True -P max_errors=10 -P filename=dataset.csv
+```
+
+This executes:
+
+```bash
+python validate.py True 10 dataset.csv
+```
+
+---
+
+# MLproject Configuration
+
+The project contains two MLflow entry points.
+
+## log_model
+
+Responsible for logging and registering the Transformer model.
+
+Run:
+
+```bash
+mlflow run . -e log_model
+```
+
+Equivalent command:
+
+```bash
+python log_model.py
+```
+
+---
+
+## validate
+
+Responsible for dataset validation.
+
+Parameters:
+
+```yaml
+metrics
+max_errors
+filename
+```
+
+Example:
+
+```bash
+mlflow run . -e validate -P metrics=True -P max_errors=10 -P filename=dataset.csv
+```
 
 ---
 
@@ -201,20 +321,61 @@ When metrics are enabled, MLflow logs:
 
 ---
 
-# Notes
+# Model Information
 
-The current model is based on `t5-small`.
+Registered model:
 
-Despite the example name, the model performs:
+```
+t5-small-summarizer
+```
+
+Base model:
+
+```
+t5-small
+```
+
+from Hugging Face.
+
+Despite the project name, the current implementation performs:
 
 ```
 English → German translation
 ```
 
-because the input prompt uses:
+The model receives the prompt:
 
 ```
 translate English to German:
 ```
 
-inside the custom MLflow PyFunc model.
+before generating the output.
+
+---
+
+# Complete Workflow
+
+```
+MLproject
+    |
+    v
+mlflow run . -e log_model
+    |
+    v
+log_model.py
+    |
+    v
+MLflow Run
+    |
+    v
+Registered Model
+    |
+    v
+mlflow models serve
+    |
+    v
+REST API
+    |
+    v
+curl request
+```

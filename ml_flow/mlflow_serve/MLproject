@@ -1,0 +1,23 @@
+name: mlflow-t5-serving-example
+
+conda_env: conda.yaml
+
+entry_points:
+
+  log_model:
+    command: "python log_model.py"
+
+  validate:
+    parameters:
+      metrics:
+        type: bool
+        default: true
+
+      max_errors:
+        type: int
+        default: 10
+
+      filename:
+        type: path
+
+    command: "python validate.py {metrics} {max_errors} {filename}"
