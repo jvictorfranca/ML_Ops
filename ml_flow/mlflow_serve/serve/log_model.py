@@ -36,4 +36,4 @@ with mlflow.start_run(run_name="t5-summarizer") as run:
     signature=signature
 )
 
-#curl -X POST -H "Content-Type:application/json; format=pandas-split" --data '{"columns":["text"],"data":[["Today is a perfect day to practice automation skills"]]}' http://127.0.0.1:5000/invocations
+#curl -X POST -H "Content-Type: application/json" --data '{"dataframe_split":{"columns":["text"],"data":[["Today is a perfect day to practice automation skills"]]}}' http://127.0.0.1:5001/invocations

@@ -78,7 +78,7 @@ Artificial Intelligence is transforming industries by automating tasks and impro
 
 ---
 
-## 🛠 Technologies
+## Technologies
 
 - Python
 - PyTorch
@@ -86,6 +86,6 @@ Artificial Intelligence is transforming industries by automating tasks and impro
 
 ---
 
-## 📄 License
+## License
 
 This project is available for educational and learning purposes.
